@@ -1,0 +1,57 @@
+# React Native
+node_modules/
+.buckconfig
+modules/
+npm-debug.log
+yarn-error.log
+/ios/Pods/
+*.xcodeproj
+*.xcworkspace
+ios/build/
+android/.gradle/
+android/app/build/
+android/build/
+*.iml
+*.keystore
+*.hprof
+
+# Build generated
+build/
+*.log
+*.lock
+*.tmp
+*.cache
+
+# Android
+*.apk
+*.dex
+/android/*/gradle-wrapper.jar
+/android/*/local.properties
+/android/*/gradlew
+/android/*/gradlew.bat
+/android/*/gradle/wrapper/
+android/captures/
+android/react-native/react.gradle
+
+# iOS
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/.DS_Store
+
+# Bundle files
+*.jsbundle
+*.map
+*.ipa
+*.app
+
+# fastlane
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+ios/fastlane/screenshots/**/*.png
+
+# Other
+.idea/
+.vscode/
+.DS_Store
+.env

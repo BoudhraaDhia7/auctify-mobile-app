@@ -1,0 +1,7 @@
+{
+  "name": "Auctify",
+  "displayName": "Auctify",
+  "androidNavigationBar": {
+    "visible": "sticky-immersive"
+  }
+}
