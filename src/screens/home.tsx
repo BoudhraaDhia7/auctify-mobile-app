@@ -13,6 +13,8 @@ import { ConnexionInterface, getProfileInfo, setIsLogin, setProfileInfo } from '
 import { useAppDispatch, useAppSelector } from '../stores/storeHook';
 import { setAccesToken } from '../apis/axiosConfig';
 import LinearGradient from 'react-native-linear-gradient';
+import Toast from 'react-native-toast-message';
+import { disconnectSocket, initiateSocket, onAuctionWin } from '../apis/socket';
 
 type HomeScreenProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -30,7 +32,7 @@ const Home = () => {
         }
         navigation.replace('Main');
     }
-
+   
     const getIsConnected = async() => {
         try {
             const value = await AsyncStorage.getItem('user');
@@ -79,6 +81,7 @@ const Home = () => {
                 style={globalStyles.bgOverlay}
             />
             <View style={globalStyles.bgOverlay}></View>
+            <Toast />
         </View>
         
     )

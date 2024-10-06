@@ -22,11 +22,13 @@ import { getProfileInfo, setProfileInfo } from '../stores/profileSlice';
 import BottomWindow from '../components/layout/general/bottomWindow';
 import CreditCard from '../components/layout/general/creditCard';
 import { getAllPack } from '../apis/actions';
+import { buyPack } from '../apis/actions';
+import Toast from 'react-native-toast-message';
 
 type TransactionsScreenProp = NativeStackNavigationProp<RootStackParamList, 'Transactions'>;
 
 const Cart = () => {
-
+    const [isLoading, setIsLoading] = useState(false);
     const navigation = useNavigation<TransactionsScreenProp>();
 
     const profile = useAppSelector((state) => state.profile);
@@ -38,6 +40,7 @@ const Cart = () => {
     const [ isBottomWindow, setIsBottomWindow ] = useState<boolean>(false);
     const [ selectedBottom, setSelectedBottom ] = useState<string>('SEND_DANNOS');
 
+    
     const thisGetProfileInfo = async(id : string) => {
         const data = await getProfileInfo(id);
         if ( data ) {
@@ -95,9 +98,42 @@ const Cart = () => {
         changeNavigationBarColor("#FFFFFF", true);
     }, [])
 
-    const selectPack = (d: number, v : number) => {
-        console.log(d, v);
-    }
+    const handleSelectPack = async (id: string) => {
+        try {
+          setIsLoading(true);
+      
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const response = await buyPack(id);
+          
+          if (response && response.finalSolde !== undefined) {
+            Toast.show({
+              type: 'success',
+              text1: 'Achat réussi',
+              text2: `Votre nouveau solde est ${response.finalSolde} Jetons.`,
+              visibilityTime: 3000,
+            });
+            dispatch(setProfileInfo({
+                ...profile.profileInfo,
+                solde: response.finalSolde
+            }));
+      
+          } else {
+            throw new Error('Réponse inattendue');
+          }
+        } catch (error) {
+          console.error('Erreur lors de l\'achat du pack:', error);
+      
+          Toast.show({
+            type: 'error',
+            text1: 'Erreur',
+            text2: 'Impossible d\'acheter le pack. Veuillez réessayer plus tard.',
+            position: 'bottom',
+            visibilityTime: 3000,
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
     const closeBottomWindow = () => {
         setIsBottomWindow(false);
@@ -108,86 +144,65 @@ const Cart = () => {
         setIsBottomWindow(true);
     }
 
-    return(
+    return (
         <View style={globalStyles.container}>
-            <StatusBar barStyle="dark-content"  backgroundColor = { statusBg } translucent = {true} animated = {true} />
-            <LinearGradient
-                colors={['#b2c6e7', '#ffffff', '#9AB6EB']}
-                start={{x: 0, y: 0}} 
-                end={{x: 1, y: 1}}
-                style={globalStyles.bgOverlay}
-            />
-            {/* <LinearGradient style={globalStyles.appBg} colors={["#9C75FF", "#6FA1FF", "#9C75FF"]}></LinearGradient> */}
-            <View style={globalStyles.bgOverlay}></View>
-            
-            <BackSection label="Packs Solde" navigateTo={navigateTo} from='Main' />
-
-            <CreditCard />
-
-            {/* <View style={{ width : '100%', paddingTop : 10, paddingHorizontal : 20}}><HrInner /></View> */}
-            
-
-            {loading ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0000ff" />
-                    <Text style={styles.loadingText}>Chargement...</Text>
-                </View>
-            ) : (
-                <ScrollView style={styles.transactionsScroll}>
-                    <View style={styles.transactionsContainer}>
-                        {cardPacks.length > 0 ? (
-                            cardPacks.map((pack : any) => (
-                                <PackItem
-                                    key={pack._id}
-                                    solde={pack.realValue}
-                                    value={pack.realValue}
-                                    selectPack={selectPack}
-                                />
-                            ))
-                        ) : (
-                            <Text style={styles.noPacksText}>Nous ajouterons bientôt des packs.</Text>
-                        )}
-                    </View>
-                </ScrollView>
-            )}
-
-            <View style={styles.sectionGetSend}>
-                <TouchableOpacity style={styles.GetSendItem} onPress={() => selectBottomSection("SEND_DANNOS")}>
-                    <Icon name="corner-left-up" size={24} color="#fff" />
-                    <Text style={styles.GetSendText}>Envoi Solde</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.GetSendItem} onPress={() => selectBottomSection("REQUEST_DANNOS")}>
-                    <Icon name="corner-left-down" size={24} color="#fff" />
-                    <Text style={styles.GetSendText}>Demande Solde</Text>
-                </TouchableOpacity>
-                
+          <StatusBar barStyle="dark-content" backgroundColor={statusBg} translucent={true} animated={true} />
+          
+          <LinearGradient
+            colors={['#b2c6e7', '#ffffff', '#9AB6EB']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={globalStyles.bgOverlay}
+          />
+    
+          <View style={globalStyles.bgOverlay}></View>
+          <BackSection label="Packs Solde" navigateTo={navigateTo} from='Main' />
+    
+          <CreditCard />
+    
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+              <Text style={styles.loadingText}>Chargement...</Text>
             </View>
-
-            
-            {/* <View style={styles.packContainer}>
-                <Shadow
-                useArt // <- set this prop to use non-native shadow on ios
-                style={{
-                    shadowOffset: {width: 0, height: 0},
-                    shadowOpacity: .1,
-                    shadowColor: "#333",
-                    shadowRadius: 20,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(255,255,255,1)',
-                    width: SCREEN.width * .45,
-                    height: 300,
-                    left: 20
-                }}
-                >
-                
-                </Shadow>
-            </View> */}
-
-            {isBottomWindow && <BottomWindow close={closeBottomWindow} windowType={selectedBottom} />}
-
+          ) : (
+            <ScrollView style={styles.transactionsScroll}>
+              <View style={styles.transactionsContainer}>
+                {cardPacks.length > 0 ? (
+                  cardPacks.map((pack: any) => (
+                    <PackItem
+                      key={pack._id}
+                      solde={pack.realValue}
+                      value={pack.realValue}
+                      id={pack._id}
+                      selectPack={handleSelectPack}
+                    />
+                  ))
+                ) : (
+                  <Text style={styles.noPacksText}>Nous ajouterons bientôt des packs.</Text>
+                )}
+              </View>
+            </ScrollView>
+          )}
+    
+          <View style={styles.sectionGetSend}>
+            <TouchableOpacity style={styles.GetSendItem} onPress={() => selectBottomSection("SEND_DANNOS")}>
+              <Icon name="corner-left-up" size={24} color="#fff" />
+              <Text style={styles.GetSendText}>Envoi Solde</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.GetSendItem} onPress={() => selectBottomSection("REQUEST_DANNOS")}>
+              <Icon name="corner-left-down" size={24} color="#fff" />
+              <Text style={styles.GetSendText}>Demande Solde</Text>
+            </TouchableOpacity>
+          </View>
+    
+          {/* Bottom window section */}
+          {isBottomWindow && <BottomWindow close={closeBottomWindow} windowType={selectedBottom} />}
+    
+          {/* Add Toast component */}
+          <Toast />
         </View>
-        
-    )
+      );
 }
 
 export const styles = StyleSheet.create({

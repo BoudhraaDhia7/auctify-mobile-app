@@ -52,3 +52,23 @@ export const onUnJoinEnchere = (cb:any) => {
     return cb(null, msg);
   });
 }
+
+export const onNotifications = (cb: any) => {
+  if (!socket) return true;
+  socket.on("newNotification", (msg) => {
+    console.log("unjoin Websocket event received!");
+    return cb(null, msg);
+  });
+};
+
+export const onAuctionWin = (socketPlayerId: any, callback: any) => {
+  if (!socket) return;
+  socket.on("newWinner", (msg) => {
+    console.log("New WebSocket event received!");
+
+    // Check if the playerId from the event matches the socket player's ID
+    if (msg.playerId === socketPlayerId) {
+      callback(); // If it matches, trigger the callback (Toast in this case)
+    }
+  });
+};

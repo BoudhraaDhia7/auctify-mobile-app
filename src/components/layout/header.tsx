@@ -14,6 +14,7 @@ const MainHeader = ({ navigateTo, openNotif } : Props) => {
 
     const profile = useAppSelector((state) => state.profile);
     const dispatch = useAppDispatch();
+    
 
     return(
         <>
@@ -22,9 +23,9 @@ const MainHeader = ({ navigateTo, openNotif } : Props) => {
                 <TouchableOpacity style={globalStyles.iconContainer} onPress={() => navigateTo('Favourite')}>
                     <Icon name="bookmark" size={24} color="#333" />
                 </TouchableOpacity>
-                <TouchableOpacity style={globalStyles.iconContainer} onPress={() => navigateTo('Saved')}>
+                {/* <TouchableOpacity style={globalStyles.iconContainer} onPress={() => navigateTo('Saved')}>
                     <Icon name="heart" size={24} color="#333" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity style={{...globalStyles.headerAvatar, marginRight: 10, backgroundColor: "#9C6CFE", borderRadius : 20}}  onPress={() => navigateTo('Cart')}>
                     <Icon name="shopping-cart" size={20} color="#FFF" />
                 </TouchableOpacity>

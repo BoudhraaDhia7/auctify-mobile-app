@@ -8,7 +8,7 @@ import { SCREEN, STATUSBAR_HEIGHT, colorShema } from '../../../assets/styles/glo
 import Jauge from '../../products/jauge';
 import { ProductInfo, ProductList } from '../../../apis/interfaces';
 import { useAppDispatch, useAppSelector } from '../../../stores/storeHook';
-import { BASE_URL } from '../../../apis/axiosConfig';
+import { BASE_URL, PICT_URL } from '../../../apis/axiosConfig';
 
 
 type Props = {
@@ -90,6 +90,11 @@ const Product = ( { close, particpateProd } : Props) => {
 
     }, []);
 
+    function generateImgUrl(filePath: string) {
+        if (filePath.includes('http')) return filePath + "&format=png"
+        console.log("filazeazeazePath", PICT_URL,filePath);
+        return `${PICT_URL}${filePath}`;
+      }
 
     return(
         <Animated.View style={[styles.container, animatedStyles]}>
@@ -103,7 +108,7 @@ const Product = ( { close, particpateProd } : Props) => {
 
                     <Animated.View style={[styles.prodPictContainer, pictAnimStyle]} >
                         <LinearGradient style={styles.prodPictContainer} colors={["#9C75FF", "#6FA1FF"]}>
-                            <Image style={{ alignSelf: 'center', marginTop: '20%', width: "80%", height: "60%", resizeMode: 'contain'}} source={{ uri : `${BASE_URL}${product.selectedProd?.prodPicture[0].filePath}`}} />
+                            <Image style={{ alignSelf: 'center', marginTop: '20%', width: "50%", height: "50%", resizeMode: 'contain'}} source={{ uri :  generateImgUrl(product.selectedProd?.prodPicture[0].filePath)}} />
                         </LinearGradient>
                     </Animated.View>
                     
@@ -135,7 +140,7 @@ const Product = ( { close, particpateProd } : Props) => {
                         
                         <LinearGradient style={styles.magasinContainer} colors={["#9C75FF", "#6FA1FF"]}>
                             <View style={styles.magasinLogoContainer}>
-                            <Image style={{ alignSelf: 'center', width: "100%", height: "100%", resizeMode: 'contain'}}  source={{ uri : `${BASE_URL}${product.selectedProd?.companyLogo}`}} />
+                            <Image style={{ alignSelf: 'center', width: "100%", height: "100%", resizeMode: 'contain'}}  source={{ uri : generateImgUrl(product.selectedProd?.companyLogo)}}  />
                             </View>
                             <View style={styles.magasinInfoContainer}>
                                 <Text style={styles.magasinInfoTitle}>{product.selectedProd?.companyName}</Text>

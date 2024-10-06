@@ -8,11 +8,12 @@ import { colorShema } from '../../../assets/styles/global';
 type Props = {
     solde : number;
     value : number;
-    selectPack : (d : number, v : number) => void;
+    selectPack : (id:string) => void;
+    id : string;
 }
 
 
-const PackItem = ({ solde, value, selectPack } : Props) => {
+const PackItem = ({ solde, value, selectPack, id } : Props) => {
 
     return(
         <View style={styles.profilStats}>
@@ -27,7 +28,7 @@ const PackItem = ({ solde, value, selectPack } : Props) => {
                         <Text style={styles.soldeCurr}>TND</Text>
                     </View>
                     
-                    <TouchableOpacity style={styles.buyButton} onPress={() => selectPack(solde, value)}>
+                    <TouchableOpacity style={styles.buyButton} onPress={() => selectPack(id)}>
                         <View style={styles.statIcon}><Icon name="shopping-cart" size={18} color="#FFF" /></View>
                         <Text style={styles.buyText}>Acheter</Text>
                     </TouchableOpacity>

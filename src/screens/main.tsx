@@ -21,6 +21,8 @@ import BottomWindow from '../components/layout/general/bottomWindow';
 import { ProductInfo, ProductList } from '../apis/interfaces';
 import { setSelectedProd } from '../stores/productSlice';
 import LinearGradient from 'react-native-linear-gradient';
+import { disconnectSocket, initiateSocket, onAuctionWin } from '../apis/socket';
+import Toast from 'react-native-toast-message';
 
 type MainScreenProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 type AuctionScreenProp = NativeStackNavigationProp<RootStackParamList, 'Auction'>;
@@ -132,6 +134,8 @@ const Main = () => {
         }
     }
 
+    const currendPlayerId = profile.connexionInfo.idClient;
+    console.log("currendPlayerId", currendPlayerId)
 
     
     const selectSection = (ss : number) => {
@@ -142,6 +146,21 @@ const Main = () => {
         setIsBottomWindow(false);
     }
 
+    useEffect(() => {
+
+        initiateSocket();
+
+        onAuctionWin(currendPlayerId, () => {
+            Toast.show({
+              type: 'success',
+              text1: 'Victoire aux enchères',
+              text2: 'Félicitations ! Vous avez remporté l\'enchère.'
+            });
+          });
+
+        return () => { disconnectSocket() }
+
+    }, [])
 
     return(
         <View style={globalStyles.container}>
@@ -182,7 +201,7 @@ const Main = () => {
 
             {isBottomWindow && <BottomWindow close={closeBottomWindow} windowType={selectedBottom} />}
 
-            
+            <Toast />
         </View>
         
     )

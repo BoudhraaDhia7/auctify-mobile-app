@@ -27,14 +27,25 @@ const EndedList = ( { selectProd, particpateProd, openAuction  } : Props) => {
 
     const renderItems = () => {
         return(
-                <View style={styles.listContainer}>
-                    {
-                        product.productList.map((p, i) => 
-                            <ProdListItem key={`pr-${i+1}`} onSelect={selectProd}  prodInfo={p} onParticipate={particpateProd} openAuction={openAuction} />
-                        )
-                    }
-                    
+            <View style={styles.listContainer}>
+            {
+              product.productList.length > 0 ? (
+                product.productList.map((p, i) => (
+                  <ProdListItem
+                    key={`pr-${i + 1}`}
+                    onSelect={selectProd}
+                    prodInfo={p}
+                    onParticipate={particpateProd}
+                    openAuction={openAuction}
+                  />
+                ))
+              ) : (
+                <View style={styles.noDataContainer}>
+                  <Text style={styles.noDataText}>Aucune enchère terminé pour le moment. De nouvelles enchères seront ajoutées bientôt !</Text>
                 </View>
+              )
+            }
+          </View>
         )
     }
 
@@ -74,18 +85,38 @@ const EndedList = ( { selectProd, particpateProd, openAuction  } : Props) => {
 }
 
 export const styles = StyleSheet.create({
-    container : {
-        position: "absolute",
-        width: "100%",
-        height: '100%',
-        paddingTop : 0
+    container: {
+      position: "absolute",
+      width: "100%",
+      height: '100%',
+      paddingTop: 0,
     },
-
-    listContainer : {
-        width : '100%',
-        paddingHorizontal : 20,
-    }
-   
-}); 
-
+  
+    listContainer: {
+      width: '100%',
+      paddingHorizontal: 20,
+    },
+  
+    noDataContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',  
+      height: '100%',
+    },
+  
+    noDataText: {
+      fontSize: 18,
+      color: '#333',
+      textAlign: 'center',
+      marginVertical: 20,
+    },
+  
+    noDataImage: {
+      width: 200,
+      height: 200,
+      resizeMode: 'contain',
+    },
+  });
+  
+  
 export default EndedList;

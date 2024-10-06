@@ -41,6 +41,19 @@ const ProdListItem = ( { prodInfo, onSelect, onParticipate, openAuction } : Prop
 
     }, [])
 
+    function generateImgUrl(filePath: string) {
+    if (filePath.includes('http')) return filePath + "&format=png"
+
+    // Replace backslashes with forward slashes
+    const normalizedFilePath = filePath.replace(/\\/g, '/')
+
+    // Ensure the filePath is properly encoded after normalization
+    const cleanFilePath = encodeURI(normalizedFilePath)
+
+    return `${PICT_URL}${cleanFilePath}`
+    }
+
+    
 
     return(
         <TouchableOpacity activeOpacity={.90} style={globalStyles.productListItem} onPress={() => onSelect(prodInfo)}>
@@ -72,16 +85,16 @@ const ProdListItem = ( { prodInfo, onSelect, onParticipate, openAuction } : Prop
                     {(prodInfo.myTotal > 0) && <View style={globalStyles.amountGiven}>
                         <Text style={globalStyles.prodAmountValue}>{prodInfo.myTotal}</Text>
                     </View>}
-                    <Text style={globalStyles.prodParticipateText}>{ timeDiffText}</Text>
+                    <Text style={globalStyles.prodParticipateText}>{timeDiffText}</Text>
                 </TouchableOpacity>}
 
 
             </View>
             <LinearGradient style={globalStyles.prodPhoto} colors={[colorShema.primary, colorShema.secondary50, colorShema.secondaryTransparent]}>
-                <Image style={globalStyles.prodPhotoPict} source={{ uri : `${BASE_URL}${prodInfo.prodPicture[0].filePath}`}} />
+                <Image style={globalStyles.prodPhotoPict} source={{ uri : generateImgUrl(prodInfo.prodPicture[0].filePath)}} />
             </LinearGradient>
             <View style={globalStyles.prodOwner}>
-                <Image style={globalStyles.prodOwnerPict} source={{ uri : `${BASE_URL}${prodInfo.companyLogo}`}} />
+                <Image style={globalStyles.prodOwnerPict} source={{ uri : generateImgUrl(prodInfo.companyLogo)}} />
             </View>
             <View style={globalStyles.prodJauge}>
                 <Jauge pourcent={prc} />

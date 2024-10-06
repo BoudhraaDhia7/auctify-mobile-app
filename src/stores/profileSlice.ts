@@ -74,9 +74,7 @@ export async function addUser(clientData: UserInfoForm ): Promise<UserInfo | und
 export async function getProfileInfo( id: string ): Promise<UserInfo | undefined> {
   
   try {
-    console.log("daaeazeazeta", id)
       const data = await axiosWithCred.post(`auth/getProfileByUserId`, { id } );
-    console.log("daaeazeazeta", id, data.data)
 
       return data.data;
   } catch (error) {

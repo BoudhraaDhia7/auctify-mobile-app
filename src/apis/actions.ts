@@ -51,6 +51,7 @@ export async function getAuctionById( userId: string, productId: string ): Promi
 }
 
 
+
 /* ----------- Cart Pack ------------------------------------- */
 //get all pack
 export async function getAllPack( ): Promise<any[] | undefined> {
@@ -61,10 +62,23 @@ export async function getAllPack( ): Promise<any[] | undefined> {
         return undefined;
     }
 }
+//Buy pack
+export async function buyPack(id: string): Promise<any | undefined> {
+    console.log("id", id)
+    try {
+      const { data } : { data: any } = await axiosWithCred.post('product/buyPack', {
+        packId: id, 
+      });
+      return data;
+    } catch (error) {
+      console.error('Erreur lors de l\'achat du pack:', error);
+      return undefined;
+    }
+  }
+
+
 
 /* ----------- Auctions ------------------------------------- */
-
-
 export async function getAuctionMembers( productId : string ): Promise<AuctionMembers[] | undefined> {
     try {
         const { data } : { data: AuctionMembers[] } = await axiosWithCred.get('api/auctions/getAuctionMembers/' + productId);
@@ -77,6 +91,27 @@ export async function getAuctionMembers( productId : string ): Promise<AuctionMe
 export async function getAuctionClassement( userId: string, productId: string  ): Promise<AuctionClassment[] | undefined> {
     try {
         const { data } : { data: AuctionClassment[] } = await axiosWithCred.post('api/auctions/getAuctionClassment/', {userId, productId});
+        return data;
+    } catch (error) {
+        return undefined;
+    }
+}
+
+export async function winAuction( productId: string  ): Promise<any[] | undefined> {
+    try {
+        const { data } : { data: any[] } = await axiosWithCred.post('winner/winner', {productId});
+        return data;
+    } catch (error) {
+        return undefined;
+    }
+}
+
+/* ----------- Notificaton ------------------------------------- */
+
+
+export async function getNotification( ): Promise<any[] | undefined> {
+    try {
+        const { data } : { data: any[] } = await axiosWithCred.get('notifications/getNotifications');
         return data;
     } catch (error) {
         return undefined;

@@ -13,12 +13,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../routes/routes';
 import BackSection from '../components/layout/BackSection';
 import ParticipationsList from '../components/layout/products/participationsList';
-import { disconnectSocket, initiateSocket, onJoinEnchere, onUnJoinEnchere, setJoinEnchere, onMiseSolde, addMiseSolde } from '../apis/socket';
-import { MiseSoldeSended, UserInfoRecieved, UserInfoSended } from '../apis/socketInterface';
+import { disconnectSocket, initiateSocket, onJoinEnchere, onUnJoinEnchere, setJoinEnchere, onMiseAuctify, addMiseAuctify } from '../apis/socket';
+import { MiseAuctifySended, UserInfoRecieved, UserInfoSended } from '../apis/socketInterface';
 import { useAppDispatch, useAppSelector } from '../stores/storeHook';
 import { getPlayerMise, removePlayer } from '../helpers';
 import { AuctionClassment, AuctionMembers, ProductList } from '../apis/interfaces';
-import { getAuctionById, getAuctionClassement, getAuctionMembers } from '../apis/actions';
+import { getAuctionById, getAuctionClassement, getAuctionMembers, winAuction } from '../apis/actions';
 import AuctionMembersList from '../components/auction/AuctionMembers';
 import { BASE_URL, PICT_URL } from '../apis/axiosConfig';
 import AuctionTimer from '../components/auction/AuctionTimer';
@@ -113,7 +113,7 @@ const Auction = () => {
     }
 
     const sendBet = (t : number) => {
-        addMiseSolde({ idUser : profile.profileInfo ? profile.profileInfo?._id : "",
+        addMiseAuctify({ idUser : profile.profileInfo ? profile.profileInfo?._id : "",
             idProduct : productId,
             amount : 1,
             duration : t })
@@ -129,11 +129,13 @@ const Auction = () => {
        
     }
 
-    const stopPlaying = () => {
+    const stopPlaying = async () => {
         setIsBet(false);
         setIsPlaying(false);
         console.log('game over');
         setIsAuctionEndCounter(false);
+        await winAuction(productId);
+        setTimeout(() => {navigateTo("Main")}, 1500);
     }
 
     useEffect(() => {
@@ -143,6 +145,7 @@ const Auction = () => {
         setJoinEnchere({ idUser: profile.connexionInfo.idClient, idProduct: productId, nickname: profile.connexionInfo.pseudo, avatar: (profile.profileInfo?.avatar ? profile.profileInfo.avatar : ""), amount: 0 });
 
         onJoinEnchere((err: any, data: UserInfoRecieved) => {
+            console.log("join ", data); 
             if (err) return;
             if (data.idProduct == productId) {
                 onGetAuctionMembers();
@@ -154,7 +157,7 @@ const Auction = () => {
             onGetAuctionMembers();
         });
 
-        onMiseSolde((err: any, data: MiseSoldeSended) => {
+        onMiseAuctify((err: any, data: MiseAuctifySended) => {
             if (err) return;
             if (data.idProduct == productId) {
                 setIsBet(false);
@@ -182,7 +185,7 @@ const Auction = () => {
                         <View style={styles.membersContainer}>
                             {<AuctionMembersList members={auctionMembers} />}
                         </View>
-                        <TouchableOpacity style={styles.auctionClose}>
+                        <TouchableOpacity style={styles.auctionClose} onPress={() => navigateTo("Home")}>
                             <Icon name='x' size={32} color={'#FFF'} />
                         </TouchableOpacity>
                     </View>
