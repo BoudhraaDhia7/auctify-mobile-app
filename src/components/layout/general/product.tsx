@@ -32,6 +32,8 @@ const Product = ( { close, particpateProd } : Props) => {
     const commum = useAppSelector((state) => state.commun);
     const profile = useAppSelector((state) => state.profile);
     const product = useAppSelector((state) => state.product);
+    
+
     const dispatch = useAppDispatch();
 
         const prc =  product.selectedProd ? ((product.selectedProd?.total / ( product.selectedProd?.prodPrice * product.selectedProd?.prodBenefit )) * 100) : 0;
@@ -61,7 +63,7 @@ const Product = ( { close, particpateProd } : Props) => {
         const t = interpolate(animValue.value, [0, 1], [ 0, 1 ], Extrapolate.CLAMP);
         return { borderRadius : r, opacity: t, transform: [{translateY : ty}] };
     });
-
+    console.log("product.selectedProd", product.selectedProd);
     const animate = (a : number) => {
         animValue.value = withSpring( a, {
             stiffness : 200,
@@ -96,6 +98,7 @@ const Product = ( { close, particpateProd } : Props) => {
         return `${PICT_URL}${filePath}`;
       }
 
+      console.log("product.selectedProd", product);
     return(
         <Animated.View style={[styles.container, animatedStyles]}>
 
@@ -116,7 +119,7 @@ const Product = ( { close, particpateProd } : Props) => {
                         <View style={styles.timingContainer}>
                             <View style={styles.detailsTiming}>
                                 <Icon name="clock" size={20} color="#FFF" /> 
-                                <Text style={styles.timingText}>Bientôt disponible</Text>
+                                <Text style={styles.timingText}>{product.selectedProd.prodStatus == 3 ? 'Enchére termine' : 'Bientôt disponible'}</Text>
                             </View>
                         </View>
 
@@ -128,10 +131,14 @@ const Product = ( { close, particpateProd } : Props) => {
                                 <Text style={styles.productInfosCurrency}>TND</Text>
                             </View>
                         </View>
-
-                        <TouchableOpacity style={styles.participationBt} onPress={() => particpateProd("PARTICIPATE", product.selectedProd)}>
-                            <Text style={styles.participationText}>PARTICIPER A 1D</Text>
-                        </TouchableOpacity>
+                        {
+                            product.selectedProd.prodStatus != 3 && (
+                                <TouchableOpacity style={styles.participationBt} onPress={() => particpateProd("PARTICIPATE", product.selectedProd)}>
+                                    <Text style={styles.participationText}>PARTICIPER A 1D</Text>
+                                </TouchableOpacity>
+                            )
+                        }
+                   
 
                         <View style={styles.productInfos}>
                             <Text style={styles.descrTitle}>Descprition</Text>

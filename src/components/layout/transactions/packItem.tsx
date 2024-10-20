@@ -8,19 +8,20 @@ import { colorShema } from '../../../assets/styles/global';
 type Props = {
     solde : number;
     value : number;
+    title : string;
     selectPack : (id:string) => void;
     id : string;
 }
 
 
-const PackItem = ({ solde, value, selectPack, id } : Props) => {
+const PackItem = ({ solde, name, value, selectPack, id } : Props) => {
 
     return(
         <View style={styles.profilStats}>
             <LinearGradient style={styles.profilStat} colors={['rgba(255,255,255,.2)', 'rgba(255,255,255,.6)', 'rgba(255,255,255,.3)']}>
                 <View style={styles.profilStatHeader}>
                     <View style={styles.statIcon}><Icon name="credit-card" size={22} color="#333" /></View>
-                    <Text style={styles.statTitle}>Pack {solde} TDN</Text>
+                    <Text style={styles.statTitle}>{name}</Text>
                 </View>
                 <View style={styles.profilStatContent}>
                     <View style={{ flexDirection : 'row', alignItems: 'flex-end'}}>

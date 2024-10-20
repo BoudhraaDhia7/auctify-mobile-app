@@ -17,6 +17,7 @@ import Saved from '../screens/saved';
 import Cart from '../screens/cart';
 import Auction from '../screens/auction';
 import { useAppSelector } from '../stores/storeHook';
+import ForgetPassword from '../screens/ForgetPassword';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -48,16 +49,20 @@ function StackNav() {
             <Stack.Screen name="Main" component={Main} options={{ headerShown: false }} />
             <Stack.Screen name="Transactions" component={Transactions} options={{ headerShown: false }} />
             <Stack.Screen name="Profil" component={Profil} options={{ headerShown: false }} />
+    
             <Stack.Screen name="Favourite" component={Favourite} options={{ headerShown: false }} />
             <Stack.Screen name="Saved" component={Saved} options={{ headerShown: false }} />
             <Stack.Screen name="Auction" component={Auction} options={{ headerShown: false }} />
           </>
         ) : (
+          <>
           <Stack.Screen
             name="Login"
             component={Login}
             options={{ headerShown: false }}
           />
+          <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

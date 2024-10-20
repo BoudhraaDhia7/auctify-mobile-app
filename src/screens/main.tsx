@@ -201,7 +201,7 @@ const Main = () => {
 
             {isBottomWindow && <BottomWindow close={closeBottomWindow} windowType={selectedBottom} />}
 
-            <Toast />
+
         </View>
         
     )

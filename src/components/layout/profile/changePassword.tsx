@@ -9,6 +9,9 @@ import Jauge from '../../products/jauge';
 import { useAppDispatch, useAppSelector } from '../../../stores/storeHook';
 import { setIsLogin, setProfileInfo } from '../../../stores/profileSlice';
 import { setAccesToken } from '../../../apis/axiosConfig';
+import ChangeEmail from './changeEmail';
+import ChangePhone from './changePhone';
+import ChangePasswordReuest from './changePasswordRequest';
 
 
 type Props = {
@@ -85,6 +88,14 @@ const ChangePassword = ( { close, navigateTo } : Props) => {
         }
     }
 
+    const [ isChangeEmail, setIsChangeEmail ] = useState<boolean>(false);
+    const [ isChangePhone, setIsChangePhone ] = useState<boolean>(false);
+    const [ isChangePassword, setIsChangePassword ] = useState<boolean>(false);
+
+    
+    const closeChangeEmail = () => { setIsChangeEmail(false) }
+    const closeChangePhone = () => { setIsChangePhone(false) }
+    const closeChangePassword = () => { setIsChangePassword(false) }
 
     return(
         <Animated.View style={[styles.container, animatedStyles]}>
@@ -110,15 +121,15 @@ const ChangePassword = ( { close, navigateTo } : Props) => {
 
                         <Text style={styles.pramTitles}>Securité</Text>
                         <View style={styles.optionContainer}>
-                            <TouchableOpacity style={styles.optionLine}>
+                            <TouchableOpacity style={styles.optionLine} onPress={() => setIsChangeEmail(true)}>
                                 <Text style={styles.optionLabel}>Changer Adresse Email</Text>
                                 <Icon name='chevron-right' size={24} color={'#333'} />
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.optionLine}>
+                            <TouchableOpacity style={styles.optionLine} onPress={() => setIsChangePhone(true)}>
                                 <Text style={styles.optionLabel}>Changer Numéro Mobile</Text>
                                 <Icon name='chevron-right' size={24} color={'#333'} />
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.optionLine}>
+                            <TouchableOpacity style={styles.optionLine} onPress={() => setIsChangePassword(true)}>
                                 <Text style={styles.optionLabel}>Changer mot de passe</Text>
                                 <Icon name='chevron-right' size={24} color={'#333'} />
                             </TouchableOpacity>
@@ -128,13 +139,13 @@ const ChangePassword = ( { close, navigateTo } : Props) => {
 
                         <View style={styles.optionContainer}>
                             <TouchableOpacity style={styles.optionLine} onPress={() => deconnect()}>
-                                <Text style={styles.optionLabel}>Déconnexion</Text>
-                                <Icon name='chevron-right' size={24} color={'#333'} />
+                            <Text style={{...styles.optionLabel, color : "#c0392b"}}>Déconnexion</Text>
+                                <Icon name='chevron-right' size={24} color={'#c0392b'} />
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.optionLine}>
+                            {/* <TouchableOpacity style={styles.optionLine}>
                                 <Text style={{...styles.optionLabel, color : "#c0392b"}}>Supression du compte</Text>
                                 <Icon name='chevron-right' size={24} color={'#333'} />
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                            
                         </View>
 
@@ -158,9 +169,12 @@ const ChangePassword = ( { close, navigateTo } : Props) => {
                     </View>
                 </View>
             </View>
+            { isChangeEmail && <ChangeEmail close={closeChangeEmail} navigateTo={navigateTo} />}
+            { isChangePhone && <ChangePhone close={closeChangePhone} navigateTo={navigateTo} />}
+            { isChangePassword && <ChangePasswordReuest close={closeChangePassword} navigateTo={navigateTo} />}
 
         </Animated.View>
-        
+            
     )
 }
 

@@ -6,9 +6,11 @@ import StackNav from './src/routes/routes';
 
 import { store } from './src/stores/store';
 import { Provider as ReduxProvider } from 'react-redux';
+import Toast from 'react-native-toast-message';
 
 const App = () => {
 
+  
   Orientation.lockToPortrait();
 
   return(
@@ -16,6 +18,7 @@ const App = () => {
       <ReduxProvider store={store}>
         <StackNav />
       </ReduxProvider>
+      <Toast />
     </GestureHandlerRootView>
   )
 

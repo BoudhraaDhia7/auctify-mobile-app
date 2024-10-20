@@ -9,14 +9,12 @@ import { SCREEN, STATUSBAR_HEIGHT, colorShema, globalStyles } from '../../../ass
 import InscriptionInput from '../inputs/inscriptionInput';
 import { useAppDispatch, useAppSelector } from '../../../stores/storeHook';
 import { EditProfileForm } from '../../../apis/interfaces';
-import { editProfile, setIsAddProfile, setProfileInfo } from '../../../stores/profileSlice';
+import { editEmail, editPhone, setEmailInfo, setIsAddProfile, setPhoneInfo } from '../../../stores/profileSlice';
+import Toast from 'react-native-toast-message';
 
 type FormValues = {
-    firstName: string;
-    lastName: string;
-    pseudo: string;
-    adresse: string;
-    ville: string;
+    phoneNumber: number;
+    confirmPhoneNumber: number;
 };
 
 
@@ -26,7 +24,7 @@ type Props = {
 }
 
 
-const EditProfile = ( { close, navigateTo } : Props) => {
+const ChangePhone = ( { close, navigateTo } : Props) => {
 
     const animValue = useSharedValue(0);
     const translationY = useSharedValue(0);
@@ -35,14 +33,10 @@ const EditProfile = ( { close, navigateTo } : Props) => {
     const dispatch = useAppDispatch();
 
     const { register, control, handleSubmit, formState: { errors } } = useForm<FormValues>({defaultValues : {
-        firstName: profile.profileInfo?.firstName,
-        lastName: profile.profileInfo?.lastName,
-        pseudo: profile.profileInfo?.userName,
-        adresse: profile.profileInfo?.address,
-        ville: profile.profileInfo?.city,
+        phoneNumber: profile.profileInfo?.phone,
+        confirmPhoneNumber: profile.profileInfo?.phone,
     }});
 
-   
 
     const scrollHandler = useAnimatedScrollHandler((event) => {
         translationY.value = event.contentOffset.y;
@@ -94,109 +88,100 @@ const EditProfile = ( { close, navigateTo } : Props) => {
     }, []);
 
     const onSubmit: SubmitHandler<FormValues> = async(data) => {
-
-        let datatoInsert : EditProfileForm;
+        let datatoInsert : {
+            id : string,
+            phoneNumber: number,
+            confirmPhoneNumber : number,
+        }
 
         datatoInsert = { 
             id : profile.profileInfo?._id ? profile.profileInfo?._id : '',
-            userName : data.pseudo,
-            firstName : data.firstName,
-            lastName : data.lastName,
-            address : data.adresse,
-            city : data.ville,
+            phoneNumber : data.phoneNumber,
+            confirmPhoneNumber : data.confirmPhoneNumber,
         };
 
             dispatch(setIsAddProfile(true));
-            const res = await editProfile(datatoInsert);
-            console.log(res);
+            const res = await editPhone(datatoInsert);
+
             if (res) {
-                dispatch(setProfileInfo(res));
+                
+                Toast.show({
+                    type: 'success',
+                    text1: 'Succès',
+                    text2: 'Votre numéro de téléphone a été modifié avec succès',
+                    visibilityTime: 3000,
+                });
+
+                // change the user email in the store state.profile = res   
+                dispatch(setPhoneInfo({ phoneNumber : datatoInsert.phoneNumber }));
             }
+
             dispatch(setIsAddProfile(false));
             thisClose();
         
     }
 
 
-    return(
+    return (
         <Animated.View style={[styles.container, animatedStyles]}>
-
             <Animated.ScrollView 
                style={styles.parentScroll}
                onScroll={scrollHandler}
                scrollEventThrottle={16}
             >
                 <View style={styles.detailsContent}>
-
-                    <Animated.View style={[styles.prodPictContainer, pictAnimStyle]} >
+                    <Animated.View style={[styles.prodPictContainer, pictAnimStyle]}>
                         <LinearGradient style={styles.prodPictContainer} colors={["#9C75FF", "#6FA1FF"]}>
                         </LinearGradient>
                     </Animated.View>
                     
                     <View style={styles.detailsZone}>
-                        
-                    <View style={styles.inscForm}>
-
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="lastName"
-                                rules={{ required: { value: true, message: 'Le nom est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Nom' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.lastName && <View><Text style={styles.errorTxt}> {errors?.lastName.message}</Text></View>}
-                        </View>
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="firstName"
-                                rules={{ required: { value: true, message: 'Le prénom est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Prénom' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.firstName && <View><Text style={styles.errorTxt}> {errors?.firstName.message}</Text></View>}
-                        </View>
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="pseudo"
-                                rules={{ required: { value: true, message: 'Le pseudo est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Pseudo' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.pseudo && <View><Text style={styles.errorTxt}> {errors?.pseudo.message}</Text></View>}
-                        </View>
-
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="adresse"
-                                rules={{ required: { value: true, message: 'Adresse est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Adresse' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.adresse && <View><Text style={styles.errorTxt}> {errors?.adresse.message}</Text></View>}
-                        </View>
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="ville"
-                                rules={{ required: { value: true, message: 'La ville est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Ville' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.ville && <View><Text style={styles.errorTxt}> {errors?.ville.message}</Text></View>}
+                        <View style={styles.inscForm}>
+                            <View style={styles.formLine}>
+                                <Controller 
+                                    control={control} 
+                                    name="phoneNumber"
+                                    rules={{ 
+                                        required: { value: true, message: 'Le numéro de téléphone est obligatoire !'},
+                                        pattern: {
+                                            value: /^\d{8}$/,
+                                            message: "Format de numéro de téléphone invalide"
+                                        }
+                                    }}
+                                    render={({ field: { onChange, value } }) =>
+                                        <InscriptionInput placeholder='Numéro de téléphone' keyboard='phone-pad' secret={false} value={value?.toString()} onChange={(v) => onChange(v)} />}
+                                />
+                                {errors?.phoneNumber && <View><Text style={styles.errorTxt}> {errors?.phoneNumber.message}</Text></View>}
+                            </View>
+                            <View style={styles.formLine}>
+                                <Controller 
+                                    control={control} 
+                                    name="confirmPhoneNumber"
+                                    rules={{ 
+                                        required: { value: true, message: 'Veuillez confirmer votre numéro de téléphone !'},
+                                        validate: value => value === control._formValues.phoneNumber || 'Les numéros de téléphone doivent correspondre !'
+                                    }}
+                                    render={({ field: { onChange, value } }) =>
+                                        <InscriptionInput placeholder='Confirmer numéro de téléphone' keyboard='phone-pad' secret={false} value={value?.toString()} onChange={(v) => onChange(v)} />}
+                                />
+                                {errors?.confirmPhoneNumber && <View><Text style={styles.errorTxt}> {errors?.confirmPhoneNumber.message}</Text></View>}
+                            </View>
                         </View>
                     </View>
-
-                        
-
-                       
-
-                    </View>
-
                 </View>
             </Animated.ScrollView>
-
+    
             <View style={styles.btSubmit}>
-                { profile.isAddProfile ? <View style={globalStyles.connectButton}>
-                <ActivityIndicator size={24} color={"#FFF"} />
-                </View> : <TouchableOpacity style={globalStyles.connectButton} onPress={handleSubmit(onSubmit)}>
-                    <Text style={globalStyles.connectButtonText}>SAUVEGARDER</Text>
-                </TouchableOpacity>}
+                { profile.isAddProfile ? 
+                    <View style={globalStyles.connectButton}>
+                        <ActivityIndicator size={24} color={"#FFF"} />
+                    </View> : 
+                    <TouchableOpacity style={globalStyles.connectButton} onPress={handleSubmit(onSubmit)}>
+                        <Text style={globalStyles.connectButtonText}>SAUVEGARDER</Text>
+                    </TouchableOpacity>
+                }
             </View>
-
+    
             <View style={styles.backSectionContainer}>
                 <Animated.View style={[styles.backSectionBg, headerAnimStyle]}>
                     <LinearGradient style={{width : '100%', height: SCREEN.width * .8}} colors={["#9C75FF", "#6FA1FF"]}>
@@ -207,14 +192,13 @@ const EditProfile = ( { close, navigateTo } : Props) => {
                         <TouchableOpacity style={styles.backIcon} onPress={() => thisClose()}>
                             <Icon name="chevron-left" size={34} color="#FFF" />
                         </TouchableOpacity>
-                        <Text style={styles.backLabel}>Editer profil</Text>
+                        <Text style={styles.backLabel}>Changer votre numéro de téléphone</Text>
                     </View>
                 </View>
             </View>
-
         </Animated.View>
-        
     )
+    
 }
 
 export const styles = StyleSheet.create({
@@ -368,4 +352,4 @@ export const styles = StyleSheet.create({
 
 }); 
 
-export default EditProfile;
+export default ChangePhone;

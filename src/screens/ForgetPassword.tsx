@@ -16,13 +16,14 @@ import SoldeAlert from '../components/layout/general/alert';
 import { AlertError } from '../apis/interfaces';
 import { useAppDispatch, useAppSelector } from '../stores/storeHook';
 import { setAlertError } from '../stores/communSlice';
-import { getProfileInfo, setIsLogin, setIsSendLogin, setProfileInfo, userLogin } from '../stores/profileSlice';
+import { forgetPassword, getProfileInfo, setIsLogin, setIsSendLogin, setProfileInfo, userLogin } from '../stores/profileSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setAccesToken } from '../apis/axiosConfig';
 import LinearGradient from 'react-native-linear-gradient';
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import Toast from 'react-native-toast-message';
 
-type LoginScreenProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+type ForgetPasswordScreenProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 type LogoMeasurements = {
     left: number;
@@ -39,18 +40,16 @@ type FormValues = {
 let logoDim : LogoMeasurements = {left:0, top:0, width:0, height:0};
 
 
-const Login = () => {
+const ForgetPassword = () => {
 
-    const navigation = useNavigation<LoginScreenProp>();
+    const navigation = useNavigation<ForgetPasswordScreenProp>();
 
     const commum = useAppSelector((state) => state.commun);
     const profile = useAppSelector((state) => state.profile);
     const dispatch = useAppDispatch();
 
-    const [ loginUser, setLoginUser ] = useState<string>("");
-    const [ loginPass, setLoginPass ] = useState<string>("");
+    const [ email, setEmail ] = useState<string>("");
 
-    const [measure, setMeasure] = useState<LogoMeasurements>({left:0, top:0, width:0, height:0});
 
     const screenRef = useRef<View>(null);
     const logoRef = useRef<Image>(null);
@@ -94,43 +93,33 @@ const Login = () => {
     
 
     const ChangeUser = (val : string) => {
-        setLoginUser(val);
-    }
-
-    const ChangePass = (val : string) => {
-        setLoginPass(val);
+        setEmail(val);
     }
 
     const updateAlert = (alert: AlertError) => {
         dispatch(setAlertError(alert));
     }
 
-    const thisGetProfileInfo = async(id : string) => {
-        const data = await getProfileInfo(id);
-        if ( data ) {
-            dispatch(setProfileInfo(data))
-        }
-        navigation.replace('Main');
-    }
+  
     
 
-    const goLogin = async() => {
+    const forgetPasswordSubmit = async() => {
             dispatch(setIsSendLogin(true));
-            const data = await userLogin({ userName: loginUser, password : loginPass });
+            const data = await forgetPassword({ email });
             dispatch(setIsSendLogin(false));
-            if (data?.isLogin) {
-                try {
-                    const jsonValue = JSON.stringify(data);
-                    await AsyncStorage.setItem('user', jsonValue);
-                    dispatch(setIsLogin(data));
-                    setAccesToken(data.token);
-                    thisGetProfileInfo(data.idClient);
-                  } catch (e) {
-                    // saving error
-                }
+            if (data) {
+              Toast.show({
+                type: 'success',
+                position: 'top',
+                text1: 'Succès',
+                text2: 'Un email vous a été envoyé pour réinitialiser votre mot de passe',
+                visibilityTime: 4000,
+                autoHide: true,
+              });
+              navigation.replace('Login');
             }
             else {
-                updateAlert({ isErrorAlert: true, alertErrorType : "ERROR", alertErrorMessage : "Utilisateur ou mot de passe incorrect !"});
+                updateAlert({ isErrorAlert: true, alertErrorType : "ERROR", alertErrorMessage : "Erreur lors de l'envoi de l'email" });
             }
     }
 
@@ -142,7 +131,7 @@ const Login = () => {
     
         ReactNativeHapticFeedback.trigger("impactMedium", options);
         // Proceed with login logic
-        goLogin();
+        forgetPasswordSubmit();
     };
 
 
@@ -178,24 +167,11 @@ const Login = () => {
                     <LoginInput 
                         placeholder="Email ou Mobile" 
                         secret={false} 
-                        value={loginUser} 
+                        value={email} 
                         onChange={ChangeUser} 
                
                     />
-                    <LoginInput 
-                        placeholder="Mot de passe" 
-                        secret={true} 
-                        value={loginPass} 
-                        onChange={ChangePass} 
-                        
-                    /> 
-
-                    {/* Forget Password */}
-                    <View style={globalStyles.forgetContainer}>
-                        <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')}>
-                            <Text style={globalStyles.forgetPass}>Mot de passe oublié ?</Text>
-                        </TouchableOpacity>
-                    </View>
+           
 
                     {/* Connect Button or Loader */}
                     {profile.isSendLogin ? (
@@ -207,7 +183,7 @@ const Login = () => {
                             style={[globalStyles.connectButton, { backgroundColor: '#64b5f6', borderRadius: 10, shadowOpacity: 0.25, shadowRadius: 5, shadowColor: '#000', shadowOffset: { height: 2, width: 0 } }]} 
                             onPress={handleLoginPress}
                         >
-                            <Text style={[globalStyles.connectButtonText, { fontSize: 18, fontWeight: 'bold', letterSpacing: 1.2 }]}>CONNEXION</Text>
+                            <Text style={[globalStyles.connectButtonText, { fontSize: 18, fontWeight: 'bold', letterSpacing: 1.2 }]}>RÉINITIALISER MOT DE PASSE</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -230,4 +206,4 @@ const Login = () => {
 }
 
 
-export default Login;
+export default ForgetPassword;

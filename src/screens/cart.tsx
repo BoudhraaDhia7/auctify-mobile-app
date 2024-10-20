@@ -174,6 +174,7 @@ const Cart = () => {
                       key={pack._id}
                       solde={pack.realValue}
                       value={pack.realValue}
+                      name={pack.title}
                       id={pack._id}
                       selectPack={handleSelectPack}
                     />
@@ -200,7 +201,6 @@ const Cart = () => {
           {isBottomWindow && <BottomWindow close={closeBottomWindow} windowType={selectedBottom} />}
     
           {/* Add Toast component */}
-          <Toast />
         </View>
       );
 }

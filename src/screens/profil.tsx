@@ -13,10 +13,10 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../routes/routes';
 import { useAppDispatch, useAppSelector } from '../stores/storeHook';
-import { reloadUserInfo } from '../apis/actions';
 import { getProfileInfo, setProfileInfo } from '../stores/profileSlice';
 import EditProfile from '../components/layout/profile/editProfile';
 import ChangePassword from '../components/layout/profile/changePassword';
+import ChangeEmail from '../components/layout/profile/changeEmail';
 
 type ProfileScreenProp = NativeStackNavigationProp<RootStackParamList, 'Profil'>;
 
@@ -29,6 +29,7 @@ const Profil = () => {
 
     const [ isEditProfile, setIsEditProfile ] = useState<boolean>(false);
     const [ isChangePass, setIsChangePass ] = useState<boolean>(false);
+
 
     const profile = useAppSelector((state) => state.profile);
     const dispatch = useAppDispatch();
@@ -174,6 +175,7 @@ const Profil = () => {
 
             { isEditProfile && <EditProfile close={closeEditProfile} navigateTo={navigateTo} />}
             { isChangePass && <ChangePassword close={closeChangePass} navigateTo={navigateTo} />}
+
 
         </View>
         

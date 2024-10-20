@@ -9,14 +9,12 @@ import { SCREEN, STATUSBAR_HEIGHT, colorShema, globalStyles } from '../../../ass
 import InscriptionInput from '../inputs/inscriptionInput';
 import { useAppDispatch, useAppSelector } from '../../../stores/storeHook';
 import { EditProfileForm } from '../../../apis/interfaces';
-import { editProfile, setIsAddProfile, setProfileInfo } from '../../../stores/profileSlice';
+import { editEmail, setEmailInfo, setIsAddProfile, setProfileInfo } from '../../../stores/profileSlice';
+import Toast from 'react-native-toast-message';
 
 type FormValues = {
-    firstName: string;
-    lastName: string;
-    pseudo: string;
-    adresse: string;
-    ville: string;
+    email: string;
+    confirmEmail: string;
 };
 
 
@@ -26,7 +24,7 @@ type Props = {
 }
 
 
-const EditProfile = ( { close, navigateTo } : Props) => {
+const ChangeEmail = ( { close, navigateTo } : Props) => {
 
     const animValue = useSharedValue(0);
     const translationY = useSharedValue(0);
@@ -35,14 +33,10 @@ const EditProfile = ( { close, navigateTo } : Props) => {
     const dispatch = useAppDispatch();
 
     const { register, control, handleSubmit, formState: { errors } } = useForm<FormValues>({defaultValues : {
-        firstName: profile.profileInfo?.firstName,
-        lastName: profile.profileInfo?.lastName,
-        pseudo: profile.profileInfo?.userName,
-        adresse: profile.profileInfo?.address,
-        ville: profile.profileInfo?.city,
+        email: profile.profileInfo?.email,
+        confirmEmail: profile.profileInfo?.email,
     }});
 
-   
 
     const scrollHandler = useAnimatedScrollHandler((event) => {
         translationY.value = event.contentOffset.y;
@@ -94,24 +88,35 @@ const EditProfile = ( { close, navigateTo } : Props) => {
     }, []);
 
     const onSubmit: SubmitHandler<FormValues> = async(data) => {
-
-        let datatoInsert : EditProfileForm;
+        let datatoInsert : {
+            id : string,
+            email : string,
+            confirmEmail : string,
+        }
 
         datatoInsert = { 
             id : profile.profileInfo?._id ? profile.profileInfo?._id : '',
-            userName : data.pseudo,
-            firstName : data.firstName,
-            lastName : data.lastName,
-            address : data.adresse,
-            city : data.ville,
+            email : data.email,
+            confirmEmail : data.confirmEmail,
         };
 
             dispatch(setIsAddProfile(true));
-            const res = await editProfile(datatoInsert);
-            console.log(res);
+            const res = await editEmail(datatoInsert);
+
             if (res) {
-                dispatch(setProfileInfo(res));
+                
+                Toast.show({
+                    type: 'success',
+                    text1: 'Succès',
+                    text2: 'Un email de confirmation a été envoyé à votre adresse email.',
+                    visibilityTime: 3000,
+                });
+
+                console.log("azeazeaze",res);
+                // change the user email in the store state.profile = res   
+                dispatch(setEmailInfo({ email : datatoInsert.email }));
             }
+
             dispatch(setIsAddProfile(false));
             thisClose();
         
@@ -120,7 +125,7 @@ const EditProfile = ( { close, navigateTo } : Props) => {
 
     return(
         <Animated.View style={[styles.container, animatedStyles]}>
-
+   
             <Animated.ScrollView 
                style={styles.parentScroll}
                onScroll={scrollHandler}
@@ -138,51 +143,25 @@ const EditProfile = ( { close, navigateTo } : Props) => {
                     <View style={styles.inscForm}>
 
                         <View style={styles.formLine}>
-                            <Controller control={control} name="lastName"
-                                rules={{ required: { value: true, message: 'Le nom est obligatoire !'} }}
+                            <Controller control={control} name="email"
+                                rules={{ required: { value: true, message: 'Email est obligatoire !'} }}
                                 render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Nom' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
+                                <InscriptionInput placeholder='Email' keyboard='default' secret={false} value={value} onChange={(v) => onChange(v)} />}
                             />
-                            {errors?.lastName && <View><Text style={styles.errorTxt}> {errors?.lastName.message}</Text></View>}
+                            {errors?.email && <View><Text style={styles.errorTxt}> {errors?.email.message}</Text></View>}
                         </View>
                         <View style={styles.formLine}>
-                            <Controller control={control} name="firstName"
-                                rules={{ required: { value: true, message: 'Le prénom est obligatoire !'} }}
+                            <Controller control={control} name="confirmEmail"
+                                rules={{ 
+                                    required: { value: true, message: 'Vous pouvez confirmer votre email !'},
+                                    validate: value => value === control._formValues.email || 'Les emails doivent correspondre !'
+                                }}
                                 render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Prénom' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
+                                <InscriptionInput placeholder='Confirmer Email' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
                             />
-                            {errors?.firstName && <View><Text style={styles.errorTxt}> {errors?.firstName.message}</Text></View>}
-                        </View>
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="pseudo"
-                                rules={{ required: { value: true, message: 'Le pseudo est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Pseudo' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.pseudo && <View><Text style={styles.errorTxt}> {errors?.pseudo.message}</Text></View>}
-                        </View>
-
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="adresse"
-                                rules={{ required: { value: true, message: 'Adresse est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Adresse' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.adresse && <View><Text style={styles.errorTxt}> {errors?.adresse.message}</Text></View>}
-                        </View>
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="ville"
-                                rules={{ required: { value: true, message: 'La ville est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Ville' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.ville && <View><Text style={styles.errorTxt}> {errors?.ville.message}</Text></View>}
+                            {errors?.confirmEmail && <View><Text style={styles.errorTxt}> {errors?.confirmEmail.message}</Text></View>}
                         </View>
                     </View>
-
-                        
-
-                       
 
                     </View>
 
@@ -207,11 +186,11 @@ const EditProfile = ( { close, navigateTo } : Props) => {
                         <TouchableOpacity style={styles.backIcon} onPress={() => thisClose()}>
                             <Icon name="chevron-left" size={34} color="#FFF" />
                         </TouchableOpacity>
-                        <Text style={styles.backLabel}>Editer profil</Text>
+                        <Text style={styles.backLabel}>Changer votre email</Text>
                     </View>
                 </View>
             </View>
-
+     
         </Animated.View>
         
     )
@@ -368,4 +347,4 @@ export const styles = StyleSheet.create({
 
 }); 
 
-export default EditProfile;
+export default ChangeEmail;

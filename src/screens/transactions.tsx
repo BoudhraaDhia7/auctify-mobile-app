@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, StatusBar, View, Image, Text, TouchableOpacity, BackHandler, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, StatusBar, View, Text, BackHandler, ScrollView } from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-
 
 import { SCREEN, globalStyles } from '../assets/styles/global';
 import BackSection from '../components/layout/BackSection';
 import TransactionItem from '../components/layout/transactions/transactionItem';
 import HrOuter from '../components/layout/general/hrOuter';
 
-
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../routes/routes';
 import { useAppDispatch, useAppSelector } from '../stores/storeHook';
-import { creditDate, creditNumber } from '../helpers';
 import CreditCard from '../components/layout/general/creditCard';
 import LinearGradient from 'react-native-linear-gradient';
+import {  getTransaction } from '../stores/profileSlice';
+import { ActivityIndicator } from 'react-native';
 
 type TransactionsScreenProp = NativeStackNavigationProp<RootStackParamList, 'Transactions'>;
 
@@ -26,6 +25,8 @@ const Transactions = () => {
     const profile = useAppSelector((state) => state.profile);
     const dispatch = useAppDispatch();
 
+    const [transactions, setTransactions] = useState<any>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const backAction = () => {
@@ -41,6 +42,21 @@ const Transactions = () => {
 
     }, []);
 
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            const res = await getTransaction(profile.profileInfo?._id ? profile.profileInfo?._id : '')
+
+            if (res) {
+                setTransactions(res);
+                setLoading(false);
+            }
+        };
+
+        fetchTransactions();
+    }, [dispatch, profile.profileInfo?._id]);
+
+    
+
     const navigateTo = (sc: any) => {
         navigation.replace(sc);
     }
@@ -51,7 +67,6 @@ const Transactions = () => {
 
 
     const [statusBg, setStatusBg] = useState<string>("transparent");
-    const [statusContent, setStatusContent] = useState<string>("dark-content");
 
     return(
         <View style={globalStyles.container}>
@@ -65,35 +80,6 @@ const Transactions = () => {
             <View style={globalStyles.bgOverlay}></View>
             
             <BackSection label="Mes Solde" navigateTo={navigateTo} from='Profil' />
-
-            {/* <View style={styles.creditCardContainer}>
-                <View style={styles.creditCard}>
-                    <Image style={{...styles.creditCard, left: 0}} source={require('../assets/images/carte_credit01.png')} />
-                    <Image style={{...styles.cardLogo}} source={require('../assets/images/logo.png')} />
-                    <Text style={styles.cardNumberShadow}>{creditNumber(profile.profileInfo?.wallet_code ? profile.profileInfo?.wallet_code : 0)}</Text>
-                    <Text style={styles.cardNumberLight}>{creditNumber(profile.profileInfo?.wallet_code ? profile.profileInfo?.wallet_code : 0)}</Text>
-                    <Text style={styles.cardNumber}>{creditNumber(profile.profileInfo?.wallet_code ? profile.profileInfo?.wallet_code : 0)}</Text>
-                    <View style={styles.cardInfo}>
-                        <Text style={styles.cardDate}>{creditDate(profile.profileInfo?.created_at ? profile.profileInfo?.created_at : '')}</Text>
-                        <Text style={styles.cardName}>{(profile.profileInfo?.firstName + " " + profile.profileInfo?.lastName).toUpperCase()}</Text>
-                    </View>
-
-                    <View style={styles.cardStats}>
-                        <View style={styles.cardStatsCol}>
-                            <Text style={styles.cardStatsColTitle}>REVENUES</Text>
-                            <Text style={styles.cardStatsColValue}>{profile.profileInfo?.amountRecieved}</Text>
-                        </View>
-                        <View style={styles.cardStatsCol}>
-                            <Text style={styles.cardStatsColTitle}>DEPONSES</Text>
-                            <Text style={styles.cardStatsColValue}>{profile.profileInfo?.amountSent}</Text>
-                        </View>
-                        <View style={styles.cardStatsCol}>
-                            <Text style={styles.cardStatsColTitle}>SOLDE</Text>
-                            <Text style={styles.cardStatsColValue}>{profile.profileInfo?.solde}</Text>
-                        </View>
-                    </View>
-                </View>  
-            </View> */}
             
             <View style={{ width : "100%"}}>
                 <CreditCard />
@@ -105,19 +91,32 @@ const Transactions = () => {
             </View>
             <HrOuter />
 
-            <ScrollView style={styles.transactionsScroll}>
+          
+
+            {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+            ) : transactions.length > 0 ? (  <ScrollView style={styles.transactionsScroll}>
                 <View style={styles.transactionsContainer}>
-                    <TransactionItem date="01-04/2023" action='Alimentation portfeuil' profile='Solde Wallet' value={50} />
-                    <TransactionItem date="02-04/2023" action="J'ai reçu des fonds" profile='Ines Letaief' value={110} />
-                    <TransactionItem date="03-04/2023" action="J'ai donné des fonds" profile='Wael Latiri' value={84} />
-                    <TransactionItem date="01-04/2023" action='Alimentation portfeuil' profile='Solde Wallet' value={50} />
-                    <TransactionItem date="02-04/2023" action="J'ai reçu des fonds" profile='Ines Letaief' value={110} />
-                    <TransactionItem date="03-04/2023" action="J'ai donné des fonds" profile='Wael Latiri' value={84} />
-                    <TransactionItem date="01-04/2023" action='Alimentation portfeuil' profile='Solde Wallet' value={50} />
-                    <TransactionItem date="02-04/2023" action="J'ai reçu des fonds" profile='Ines Letaief' value={110} />
-                    <TransactionItem date="03-04/2023" action="J'ai donné des fonds" profile='Wael Latiri' value={84} />
+                    {/* <TransactionItem date="01-04/2024" action='Alimentation portfeuil' profile='Solde Wallet' value={50} />
+                    <TransactionItem date="02-04/2024" action="J'ai reçu des fonds" profile='Mehdi Belgacem' value={110} />
+                    <TransactionItem date="03-04/2024" action="J'ai donné des fonds" profile='Mohamed ben ahmed' value={84} />
+                    <TransactionItem date="01-04/2024" action='Alimentation portfeuil' profile='Solde Wallet' value={50} />
+                    <TransactionItem date="02-04/2024" action="J'ai reçu des fonds" profile='Mehdi Belgacem' value={110} />
+                    <TransactionItem date="03-04/2024" action="J'ai donné des fonds" profile='Mohamed ben ahmed' value={84} />
+                    <TransactionItem date="01-04/2024" action='Alimentation portfeuil' profile='Solde Wallet' value={50} />
+                    <TransactionItem date="02-04/2024" action="J'ai reçu des fonds" profile='Mehdi Belgacem' value={110} />
+                    <TransactionItem date="03-04/2024" action="J'ai donné des fonds" profile='Mohamed ben ahmed' value={84} /> */}
+                    {transactions.map((transaction: any) => (
+                        <TransactionItem key={transaction._id} date={transaction.formattedDate} action={"J'ai reçu des fonds"} profile={transaction.userProfile?.username ?? 'Mehdi Belgacem'} value={transaction.amount} />
+                    ))}
                 </View>
             </ScrollView>
+            ) : (
+                <View style={styles.noTransactionsContainer}>
+                    <Text style={styles.noTransactionsText}>Aucune transaction disponible.</Text>
+                </View>
+            )}
+
            
 
         </View>
@@ -126,6 +125,19 @@ const Transactions = () => {
 }
 
 export const styles = StyleSheet.create({
+    noTransactionsContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    
+    noTransactionsText: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+    },
+
 
     creditCardContainer : {
         width: "100%",

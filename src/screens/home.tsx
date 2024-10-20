@@ -81,7 +81,6 @@ const Home = () => {
                 style={globalStyles.bgOverlay}
             />
             <View style={globalStyles.bgOverlay}></View>
-            <Toast />
         </View>
         
     )

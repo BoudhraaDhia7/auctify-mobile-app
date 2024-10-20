@@ -1,22 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, StatusBar, View, Image, Text, TouchableOpacity, BackHandler, ActivityIndicator, Pressable, TextInput, ScrollView } from 'react-native';
-import Animated, { useSharedValue, withSpring, useAnimatedStyle, interpolate, Extrapolation, withTiming, Easing, Extrapolate, useAnimatedScrollHandler } from 'react-native-reanimated';
+import React, { useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, BackHandler, ActivityIndicator } from 'react-native';
+import Animated, { useSharedValue, withSpring, useAnimatedStyle, interpolate, Extrapolate, useAnimatedScrollHandler } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
 import LinearGradient from 'react-native-linear-gradient';
-import { Controller, useForm, Resolver, SubmitHandler   } from 'react-hook-form';
+import { Controller, useForm, SubmitHandler   } from 'react-hook-form';
 
 import { SCREEN, STATUSBAR_HEIGHT, colorShema, globalStyles } from '../../../assets/styles/global';
 import InscriptionInput from '../inputs/inscriptionInput';
 import { useAppDispatch, useAppSelector } from '../../../stores/storeHook';
-import { EditProfileForm } from '../../../apis/interfaces';
-import { editProfile, setIsAddProfile, setProfileInfo } from '../../../stores/profileSlice';
+import { editPassword, setIsAddProfile } from '../../../stores/profileSlice';
+import Toast from 'react-native-toast-message';
 
 type FormValues = {
-    firstName: string;
-    lastName: string;
-    pseudo: string;
-    adresse: string;
-    ville: string;
+    password: string;
+    confirmPassword: string;
 };
 
 
@@ -26,7 +23,7 @@ type Props = {
 }
 
 
-const EditProfile = ( { close, navigateTo } : Props) => {
+const ChangePasswordReuest = ( { close, navigateTo } : Props) => {
 
     const animValue = useSharedValue(0);
     const translationY = useSharedValue(0);
@@ -34,15 +31,11 @@ const EditProfile = ( { close, navigateTo } : Props) => {
     const profile = useAppSelector((state) => state.profile);
     const dispatch = useAppDispatch();
 
-    const { register, control, handleSubmit, formState: { errors } } = useForm<FormValues>({defaultValues : {
-        firstName: profile.profileInfo?.firstName,
-        lastName: profile.profileInfo?.lastName,
-        pseudo: profile.profileInfo?.userName,
-        adresse: profile.profileInfo?.address,
-        ville: profile.profileInfo?.city,
+    const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({defaultValues : {
+        password: '',
+        confirmPassword: '',
     }});
 
-   
 
     const scrollHandler = useAnimatedScrollHandler((event) => {
         translationY.value = event.contentOffset.y;
@@ -94,109 +87,98 @@ const EditProfile = ( { close, navigateTo } : Props) => {
     }, []);
 
     const onSubmit: SubmitHandler<FormValues> = async(data) => {
-
-        let datatoInsert : EditProfileForm;
+        let datatoInsert : {
+            id : string,
+            password: string,
+            confirmPassword : string,
+        }
 
         datatoInsert = { 
             id : profile.profileInfo?._id ? profile.profileInfo?._id : '',
-            userName : data.pseudo,
-            firstName : data.firstName,
-            lastName : data.lastName,
-            address : data.adresse,
-            city : data.ville,
+            password : data.password,
+            confirmPassword : data.confirmPassword,
         };
 
             dispatch(setIsAddProfile(true));
-            const res = await editProfile(datatoInsert);
-            console.log(res);
+            const res = await editPassword(datatoInsert);
+
             if (res) {
-                dispatch(setProfileInfo(res));
+                
+                Toast.show({
+                    type: 'success',
+                    text1: 'Succès',
+                    text2: 'Votre mot de passe a été modifié avec succès !',
+                    visibilityTime: 3000,
+                });
+
             }
+
             dispatch(setIsAddProfile(false));
             thisClose();
         
     }
 
 
-    return(
+    return (
         <Animated.View style={[styles.container, animatedStyles]}>
-
             <Animated.ScrollView 
                style={styles.parentScroll}
                onScroll={scrollHandler}
                scrollEventThrottle={16}
             >
                 <View style={styles.detailsContent}>
-
-                    <Animated.View style={[styles.prodPictContainer, pictAnimStyle]} >
+                    <Animated.View style={[styles.prodPictContainer, pictAnimStyle]}>
                         <LinearGradient style={styles.prodPictContainer} colors={["#9C75FF", "#6FA1FF"]}>
                         </LinearGradient>
                     </Animated.View>
                     
                     <View style={styles.detailsZone}>
-                        
-                    <View style={styles.inscForm}>
-
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="lastName"
-                                rules={{ required: { value: true, message: 'Le nom est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Nom' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.lastName && <View><Text style={styles.errorTxt}> {errors?.lastName.message}</Text></View>}
-                        </View>
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="firstName"
-                                rules={{ required: { value: true, message: 'Le prénom est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Prénom' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.firstName && <View><Text style={styles.errorTxt}> {errors?.firstName.message}</Text></View>}
-                        </View>
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="pseudo"
-                                rules={{ required: { value: true, message: 'Le pseudo est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Pseudo' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.pseudo && <View><Text style={styles.errorTxt}> {errors?.pseudo.message}</Text></View>}
-                        </View>
-
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="adresse"
-                                rules={{ required: { value: true, message: 'Adresse est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Adresse' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.adresse && <View><Text style={styles.errorTxt}> {errors?.adresse.message}</Text></View>}
-                        </View>
-                        <View style={styles.formLine}>
-                            <Controller control={control} name="ville"
-                                rules={{ required: { value: true, message: 'La ville est obligatoire !'} }}
-                                render={({ field: { onChange, value } }) =>
-                                <InscriptionInput placeholder='Ville' keyboard='default' secret={false} value = {value} onChange={(v) => onChange(v)} />}
-                            />
-                            {errors?.ville && <View><Text style={styles.errorTxt}> {errors?.ville.message}</Text></View>}
+                        <View style={styles.inscForm}>
+                            <View style={styles.formLine}>
+                                <Controller 
+                                    control={control} 
+                                    name="password"
+                                    rules={{ 
+                                        required: { value: true, message: 'Le mot de passe est obligatoire !'},
+                                        minLength: {
+                                            value: 8,
+                                            message: "Le mot de passe doit contenir au moins 8 caractères"
+                                        }
+                                    }}
+                                    render={({ field: { onChange, value } }) =>
+                                        <InscriptionInput placeholder='Nouveau mot de passe' keyboard='default' secret={true} value={value} onChange={(v) => onChange(v)} />}
+                                />
+                                {errors?.password && <View><Text style={styles.errorTxt}> {errors?.password.message}</Text></View>}
+                            </View>
+                            <View style={styles.formLine}>
+                                <Controller 
+                                    control={control} 
+                                    name="confirmPassword"
+                                    rules={{ 
+                                        required: { value: true, message: 'Veuillez confirmer votre mot de passe !'},
+                                        validate: value => value === control._formValues.password || 'Les mots de passe doivent correspondre !'
+                                    }}
+                                    render={({ field: { onChange, value } }) =>
+                                        <InscriptionInput placeholder='Confirmer le mot de passe' keyboard='default' secret={true} value={value} onChange={(v) => onChange(v)} />}
+                                />
+                                {errors?.confirmPassword && <View><Text style={styles.errorTxt}> {errors?.confirmPassword.message}</Text></View>}
+                            </View>
                         </View>
                     </View>
-
-                        
-
-                       
-
-                    </View>
-
                 </View>
             </Animated.ScrollView>
-
+    
             <View style={styles.btSubmit}>
-                { profile.isAddProfile ? <View style={globalStyles.connectButton}>
-                <ActivityIndicator size={24} color={"#FFF"} />
-                </View> : <TouchableOpacity style={globalStyles.connectButton} onPress={handleSubmit(onSubmit)}>
-                    <Text style={globalStyles.connectButtonText}>SAUVEGARDER</Text>
-                </TouchableOpacity>}
+                { profile.isAddProfile ? 
+                    <View style={globalStyles.connectButton}>
+                        <ActivityIndicator size={24} color={"#FFF"} />
+                    </View> : 
+                    <TouchableOpacity style={globalStyles.connectButton} onPress={handleSubmit(onSubmit)}>
+                        <Text style={globalStyles.connectButtonText}>SAUVEGARDER</Text>
+                    </TouchableOpacity>
+                }
             </View>
-
+    
             <View style={styles.backSectionContainer}>
                 <Animated.View style={[styles.backSectionBg, headerAnimStyle]}>
                     <LinearGradient style={{width : '100%', height: SCREEN.width * .8}} colors={["#9C75FF", "#6FA1FF"]}>
@@ -207,14 +189,13 @@ const EditProfile = ( { close, navigateTo } : Props) => {
                         <TouchableOpacity style={styles.backIcon} onPress={() => thisClose()}>
                             <Icon name="chevron-left" size={34} color="#FFF" />
                         </TouchableOpacity>
-                        <Text style={styles.backLabel}>Editer profil</Text>
+                        <Text style={styles.backLabel}>Changer votre mot de passe</Text>
                     </View>
                 </View>
             </View>
-
         </Animated.View>
-        
     )
+    
 }
 
 export const styles = StyleSheet.create({
@@ -368,4 +349,4 @@ export const styles = StyleSheet.create({
 
 }); 
 
-export default EditProfile;
+export default ChangePasswordReuest;

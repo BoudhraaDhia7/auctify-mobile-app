@@ -27,6 +27,7 @@ import InactiveBet from '../components/auction/InactiveBet';
 import AuctionClassmentItem from '../components/auction/AuctionClassment';
 import { getProfileInfo, setProfileInfo } from '../stores/profileSlice';
 import CloseBet from '../components/auction/closeBet';
+import { TextInput } from 'react-native-gesture-handler';
 
 
 
@@ -42,6 +43,7 @@ const Auction = () => {
     const dispatch = useAppDispatch();
 
     const [players, setPlayers] = useState<UserInfoRecieved[]>([]);
+    const [betAmount, setBetAmount] = useState<string>("");
     
     const [auctionInfo, setAuctionInfo] = useState<ProductList[]>([]);
     const [auctionMembers, setAuctionMembers] = useState<AuctionMembers[]>([]);
@@ -115,7 +117,7 @@ const Auction = () => {
     const sendBet = (t : number) => {
         addMiseAuctify({ idUser : profile.profileInfo ? profile.profileInfo?._id : "",
             idProduct : productId,
-            amount : 1,
+            amount : Number(betAmount),
             duration : t })
     }
 
@@ -227,20 +229,28 @@ const Auction = () => {
                     </View>
 
                     <View style={styles.miseContainer}>
-                        <View style={styles.mesSolde}>
-                            <Text style={styles.ttValue}>Mon Solde</Text>
-                            <Text style={styles.nbrValue}>{profile.profileInfo?.solde}</Text>
-                        </View>
+                    <View style={styles.mesSolde}>
+                        <Text style={styles.ttValue}>Mon Solde</Text>
+                        <Text style={styles.nbrValue}>{profile.profileInfo?.solde}</Text>
+                    </View>
 
-                        {( isPlaying && isBet) ? <ActiveBet updateBetState={updateBetState} sendBet={sendBet} /> : <InactiveBet updateBetState={updateBetState} /> }
-             
+                    {(isPlaying && isBet) ? <ActiveBet updateBetState={updateBetState} sendBet={sendBet} /> : <InactiveBet updateBetState={updateBetState} />}
+                        <View style={styles.betInputContainer}>
+                            <TextInput 
+                                style={styles.betInput}
+                                placeholder="Mise"
+                                placeholderTextColor="#FFF"
+                                keyboardType="numeric"
+                                onChangeText={(text) => setBetAmount(text)}
+                                defaultValue={betAmount}
+                            />
+                        </View>
+                        
                         <View style={styles.mesMise}>
                             <Text style={styles.ttValue}>Mes Mises</Text>
                             <Text style={styles.nbrValue}>{getPlayerMise(auctionClassment, profile.profileInfo ? profile.profileInfo._id : '-')}</Text>
                         </View>
-                    </View>
-
-               
+                    </View>               
                 </View>
                 
                 </LinearGradient>
@@ -252,7 +262,26 @@ const Auction = () => {
 }
 
 export const styles = StyleSheet.create({
-
+    betInputContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    
+    betInput: {
+        width: '80%',
+        height: 40,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        color: '#FFF',
+        fontFamily: 'Orbitron-Bold',
+        fontSize: 16,
+        paddingHorizontal: 10,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
+    },
+    
     container: {
         width: "100%",
         flex: 1,

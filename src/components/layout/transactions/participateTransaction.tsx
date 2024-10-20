@@ -6,7 +6,7 @@ import { BlurView } from "@react-native-community/blur";
 import { colorShema } from '../../../assets/styles/global';
 import { getInitialName } from '../../../helpers';
 import { useAppDispatch, useAppSelector } from '../../../stores/storeHook';
-import { BASE_URL } from '../../../apis/axiosConfig';
+import { BASE_URL, PICT_URL } from '../../../apis/axiosConfig';
 import { ParticipateForm } from '../../../apis/interfaces';
 import { participateProduct } from '../../../apis/actions';
 import { getProfileInfo, setProfileInfo } from '../../../stores/profileSlice';
@@ -67,6 +67,18 @@ const ParticipateTransaction = ({ close } : Props) => {
         close();
     }
 
+    function generateImgUrl(filePath: string) {
+        if (filePath.includes('http')) return filePath + "&format=png"
+
+        // Replace backslashes with forward slashes
+        const normalizedFilePath = filePath.replace(/\\/g, '/')
+
+        // Ensure the filePath is properly encoded after normalization
+        const cleanFilePath = encodeURI(normalizedFilePath)
+
+        return `${PICT_URL}${cleanFilePath}`
+    }
+
 
     return(
         <BlurView style={styles.container}
@@ -86,7 +98,7 @@ const ParticipateTransaction = ({ close } : Props) => {
                 
                 <View style={styles.fieldContainer}>
                     <LinearGradient style={styles.pictContainer} colors={[colorShema.primary, colorShema.secondary50, colorShema.secondary50]}>
-                        <Image style={{width: '80%', height: '80%'}} source={{ uri : `${BASE_URL}${product.selectedProd?.prodPicture[0].filePath}`}} />
+                        <Image style={{width: '80%', height: '80%'}} source={{ uri :generateImgUrl(product.selectedProd?.prodPicture[0].filePath ?? '')}} />
                     </LinearGradient>
                     <View style={styles.infoContainer}>
                         <Text style={styles.prodName}>{product.selectedProd?.prodName}</Text>

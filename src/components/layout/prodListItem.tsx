@@ -42,15 +42,15 @@ const ProdListItem = ( { prodInfo, onSelect, onParticipate, openAuction } : Prop
     }, [])
 
     function generateImgUrl(filePath: string) {
-    if (filePath.includes('http')) return filePath + "&format=png"
+        if (filePath.includes('http')) return filePath + "&format=png"
 
-    // Replace backslashes with forward slashes
-    const normalizedFilePath = filePath.replace(/\\/g, '/')
+        // Replace backslashes with forward slashes
+        const normalizedFilePath = filePath.replace(/\\/g, '/')
 
-    // Ensure the filePath is properly encoded after normalization
-    const cleanFilePath = encodeURI(normalizedFilePath)
+        // Ensure the filePath is properly encoded after normalization
+        const cleanFilePath = encodeURI(normalizedFilePath)
 
-    return `${PICT_URL}${cleanFilePath}`
+        return `${PICT_URL}${cleanFilePath}`
     }
 
     
